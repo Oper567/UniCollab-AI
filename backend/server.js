@@ -5,14 +5,13 @@ const { createClient } = require('@supabase/supabase-js');
 
 const app = express();
 
-// --- 1. ENHANCED CORS (Crucial for Mobile/Hotspot) ---
+// --- 1. CLOUD-READY CORS ---
 app.use(cors({
-    origin: '*', // Allows any device on your hotspot to connect
+    origin: '*', 
     methods: ['GET', 'POST', 'PUT', 'DELETE'],
     allowedHeaders: ['Content-Type', 'Authorization', 'Accept']
 }));
 
-// Increased limits for large PDF buffers and AI responses
 app.use(express.json({ limit: '50mb' })); 
 app.use(express.urlencoded({ limit: '50mb', extended: true }));
 
@@ -27,7 +26,8 @@ app.use((req, res, next) => {
 
 // --- 4. HEALTH CHECK ---
 app.get('/', (req, res) => {
-    res.status(200).send("🚀 UniCollab Server is LIVE and REACHABLE via Hotspot!");
+    // Updated message for the cloud
+    res.status(200).send("🚀 UniCollab AI Server is LIVE on Render!");
 });
 
 // --- 5. ROUTES ---
@@ -55,25 +55,23 @@ app.use((err, req, res, next) => {
     });
 });
 
-// --- 7. START SERVER WITH NETWORK-STABLE SETTINGS ---
-const PORT = 5002; 
+// --- 7. START SERVER (UPDATED FOR RENDER) ---
+// Render will automatically pass a PORT variable. If not, it defaults to 10000.
+const PORT = process.env.PORT || 10000; 
 const server = app.listen(PORT, '0.0.0.0', () => {
     console.log(`-----------------------------------------------`);
-    console.log(`🚀 UniCollab Backend Successfully Started`);
-    console.log(`📡 HOTSPOT IP: http://10.121.105.36:${PORT}`);
-    console.log(`💡 STATUS: Listening on all interfaces (0.0.0.0)`);
+    console.log(`🚀 UniCollab Backend Live in the Cloud`);
+    console.log(`📡 Port: ${PORT}`);
+    console.log(`💡 Mode: Production (Render)`);
     console.log(`-----------------------------------------------`);
 });
 
-// --- 8. CRITICAL HOTSPOT STABILITY CONFIG ---
-// Mobile hotspots are prone to dropping idle connections.
-// These settings force the socket to wait for slow AI generations.
-server.timeout = 600000; // 10 Minutes (Wait for Llama)
-server.keepAliveTimeout = 120000; // 2 Minutes
-server.headersTimeout = 130000; // Slightly more than keepAlive
+// --- 8. STABILITY CONFIG ---
+server.timeout = 600000; 
+server.keepAliveTimeout = 120000; 
+server.headersTimeout = 130000; 
 
-// Handle server-wide timeout events to prevent the app from hanging
 server.on('timeout', (socket) => {
-    console.warn("⚠️ [Server Timeout] A request took too long. Check AI processing speed.");
+    console.warn("⚠️ [Server Timeout] Request exceeded 10 mins.");
     socket.destroy();
 });
